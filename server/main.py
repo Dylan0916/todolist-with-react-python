@@ -1,66 +1,75 @@
-"""
-{
-    "id": 1,
-    "task": "Buy milk",
-    "is_completed": False
-}
-"""
-
-to_do_list = []
-id = len(to_do_list) + 1
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 
+from schemas import ToDoTaskParams
+import toDoListHelpers
+
+app = FastAPI()
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:5173",
+    "https://localhost:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+def get_response(data, message: str = "success"):
+    return {"data": data, "message": message}
+
+
+@app.get("/api/todos")
 def get_to_do_list():
-    return to_do_list
+    to_do_list = toDoListHelpers.get_to_do_list()
+
+    return get_response({"list": to_do_list})
 
 
-def add_new_to_do(task):
-    global id
-    new_task = {"id": id, "task": task, "is_completed": False}
-    to_do_list.append(new_task)
-    id += 1
+@app.post("/api/todo")
+def add_new_to_do_task(item: ToDoTaskParams):
+    to_do_list = toDoListHelpers.add_new_to_do_task(item.task)
 
-    return to_do_list
+    return get_response({"list": to_do_list}, "添加成功")
 
 
-def edit_to_do_list_by_id(id, new_task):
-    target_task = next((task for task in to_do_list if task.get("id") == id), None)
+@app.patch("/api/todo/{id}")
+def edit_to_do_task_by_id(id: str, item: ToDoTaskParams):
+    target_task = toDoListHelpers.edit_to_do_task_by_id(id, item.task)
 
-    if not target_task:
-        raise ValueError("Task not found")
-
-    target_task["task"] = new_task
-
-    return target_task
+    return get_response(target_task, "編輯成功")
 
 
-def mark_task_as_completed_by_id(id):
-    target_task = next((task for task in to_do_list if task.get("id") == id), None)
+@app.patch("/api/todo/{id}/complete")
+def mark_task_as_completed_by_id(id: str):
+    target_task = toDoListHelpers.mark_task_as_completed_by_id(id)
 
-    if not target_task:
-        raise ValueError("Task not found")
-
-    target_task["is_completed"] = True
-
-    return target_task
+    return get_response(target_task, f"已標記 {id} completed")
 
 
-def remove_to_do_list_by_id(id):
-    global to_do_list
-    to_do_list = list(filter(lambda task: task["id"] != id, to_do_list))
+@app.delete("/api/todo/{id}")
+def remove_to_do_task_by_id(id):
+    to_do_list = toDoListHelpers.remove_to_do_task_by_id(id)
 
-    return to_do_list
+    return get_response({"list": to_do_list}, "刪除成功")
 
 
+@app.delete("/api/todos/completed")
 def remove_all_completed_tasks():
-    global to_do_list
-    to_do_list = list(filter(lambda task: task["is_completed"] is False, to_do_list))
+    to_do_list = toDoListHelpers.remove_all_completed_tasks()
 
-    return to_do_list
+    return get_response({"list": to_do_list}, "刪除成功")
 
 
 def main():
-    print(get_to_do_list())
+    pass
 
 
 if __name__ == "__main__":
