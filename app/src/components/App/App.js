@@ -1,7 +1,18 @@
 // import './App.css';
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, act } from "react";
 import TodoItem from "../TodoItem";
 import TodoItemAdder from "../TodoItemAdder";
+import KeyTestItem from "../KeyTestItem";
+import Button from "@mui/material/Button";
+
+import { DndContext } from "@dnd-kit/core";
+
+import { arrayMove, SortableContext } from "@dnd-kit/sortable";
+
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
 // 241019-002: Module not found: Error: Can't resolve 'styled-components'
 // import styled from 'styled-components';
 // https://styled-components.com/docs/basics#installation
@@ -9,6 +20,8 @@ import TodoItemAdder from "../TodoItemAdder";
 
 function App() {
   const [title, setTitle] = useState("TodoList");
+
+  const [KeyTestList, setKeyTestList] = useState(["apple", "banana", "c"]);
 
   // Todo: How to use setTodos to get data from database or file
   // Adding status for judging adding or editing
@@ -150,31 +163,81 @@ function App() {
     setTodos([]);
   };
 
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (over && active.id != over.id) {
+      setTodos((item) => {
+        const oldIdx = todos.findIndex((item) => item.id === active.id);
+        const newIdx = todos.findIndex((item) => item.id === over.id);
+        return arrayMove(todos, oldIdx, newIdx);
+      });
+    }
+  };
+
+  const delKeyTestItem = (refIndex) => {
+    setKeyTestList((prev) => {
+      const newary = prev.filter((eleInLst, index) => {
+        return refIndex !== index;
+      });
+      return newary;
+    });
+  };
+
   return (
     <div>
       <div id="app">{title}</div>
       <div id="toolbar">
-        <button onClick={onCheckAll}>Check all</button>
-        <button onClick={onUncheckAll}>Uncheck all</button>
-        <button onClick={onDelAll}>Delete all</button>
+        <Button size="small" variant="outlined" onClick={onCheckAll}>
+          Check all
+        </Button>
+        <Button size="small" variant="outlined" onClick={onUncheckAll}>
+          Uncheck all
+        </Button>
+        <Button size="small" variant="outlined" onClick={onDelAll}>
+          Delete all
+        </Button>
       </div>
       <div id="todolist" style={{ width: "400px" }}>
-        {todos.map((todo) => (
-          <TodoItem
-            key={todo.id}
-            itemTitle={todo.itemTitle}
-            isChecked={todo.isChecked}
-            isEditing={todo.isEditing}
-            id={todo.id}
-            startEdit={startEdit}
-            delItem={delItem}
-            doToggleCheck={doToggleCheck}
-            doEditComplete={doEditComplete}
-            endEdit={endEdit}
-          />
-        ))}
+        <List>
+          <DndContext
+            onDragStart={() => {}}
+            onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis]}
+          >
+            <SortableContext items={todos}>
+              {todos.map((todo) => (
+                <ListItem>
+                  <ListItemButton>
+                    <TodoItem
+                      key={todo.id}
+                      itemTitle={todo.itemTitle}
+                      isChecked={todo.isChecked}
+                      isEditing={todo.isEditing}
+                      id={todo.id}
+                      startEdit={startEdit}
+                      delItem={delItem}
+                      doToggleCheck={doToggleCheck}
+                      doEditComplete={doEditComplete}
+                      endEdit={endEdit}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </SortableContext>
+          </DndContext>
+        </List>
 
         <TodoItemAdder doAddComplete={doAddComplete} />
+      </div>
+
+      <div>
+        {KeyTestList.map((myKeyTestList, index) => (
+          <KeyTestItem
+            key={index}
+            delKeyTestItem={() => delKeyTestItem(index)}
+          />
+        ))}
       </div>
     </div>
   );

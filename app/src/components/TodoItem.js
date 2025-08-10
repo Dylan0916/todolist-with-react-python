@@ -1,6 +1,22 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import Fab from "@mui/material/Fab";
+import EditIcon from "@mui/icons-material/Edit";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import MenuIcon from "@mui/icons-material/Menu";
+import Checkbox from "@mui/material/Checkbox";
+import TextField from "@mui/material/TextField";
+import IconButton from "@mui/material/IconButton";
 
 function TodoItem(props) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({
+      id: props.id,
+    });
+
   /**
    * blk-0x00 init: global to local
    */
@@ -28,7 +44,8 @@ function TodoItem(props) {
     props.delItem(props.id);
   };
 
-  const onEdit = () => {
+  const onEdit = (event) => {
+    console.log(event);
     props.startEdit(props.id);
     focusIpt();
   };
@@ -60,13 +77,37 @@ function TodoItem(props) {
   const renderBtns = () => {
     return Boolean(props.isEditing) ? (
       <>
-        <button onClick={onEditComplete}>o</button>
-        <button onClick={onEditCancel}>x</button>
+        <IconButton
+          size="small"
+          color="primary"
+          aria-label="edit"
+          onClick={onEditComplete}
+        >
+          <CheckIcon />
+        </IconButton>
+        <Fab
+          size="small"
+          color="primary"
+          // aria-label="edit"
+          onClick={onEditCancel}
+        >
+          <CloseIcon />
+        </Fab>
       </>
     ) : (
       <>
-        <button onClick={onEdit}>Edit</button>
-        <button onClick={onDelete}>del</button>
+        <IconButton
+          size="small"
+          color="primary"
+          aria-label="edit"
+          onClick={onEdit}
+        >
+          <EditIcon />
+        </IconButton>
+
+        <Fab size="small" color="primary" aria-label="edit" onClick={onDelete}>
+          <DeleteForeverIcon />
+        </Fab>
       </>
     );
   };
@@ -75,7 +116,8 @@ function TodoItem(props) {
     return (
       /**0705 */
       Boolean(props.isEditing) ? (
-        <input
+        <TextField
+          size="small"
           ref={refTitleIpt}
           type="text"
           value={title}
@@ -87,7 +129,7 @@ function TodoItem(props) {
               onEditCancel();
             }
           }}
-        ></input>
+        ></TextField>
       ) : (
         <label
           style={{
@@ -103,18 +145,40 @@ function TodoItem(props) {
 
   // blk-0x04 end
 
-  return (
-    <div style={{ display: "flex" }}>
-      <button style={Boolean(props.isEditing) ? { visibility: "hidden" } : {}}>
-        Drag block
-      </button>
+  const dragStyle = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
-      <input
+  const dragBtnStyle = {
+    ...(Boolean(props.isEditing) ? { visibility: "hidden" } : {}),
+    // cursor: "grab",
+  };
+
+  const menuProps = {
+    size: "small",
+    color: "primary",
+    // ariaLabel: "menu", //Todo
+    style: dragBtnStyle,
+  };
+
+  return (
+    <div
+      {...listeners}
+      ref={setNodeRef}
+      style={{ ...dragStyle, display: "flex" }}
+    >
+      <IconButton {...menuProps}>
+        <MenuIcon />
+      </IconButton>
+
+      <Checkbox
         style={Boolean(props.isEditing) ? { visibility: "hidden" } : {}}
         onChange={toggleCheck}
         checked={props.isChecked}
         type="checkbox"
-      ></input>
+      ></Checkbox>
+
       <div style={{ flex: "1" }}>{renderTitle()}</div>
       <div style={{ width: "100px" }}>{renderBtns()}</div>
     </div>
