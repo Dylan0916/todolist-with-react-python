@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+import AddIcon from "@mui/icons-material/Add";
 function TodoItemAdder(props) {
   /**
    * blk-0x00 init: global to local
@@ -18,18 +21,23 @@ function TodoItemAdder(props) {
   const renderAddBtns = () => {
     console.log("TodoItemAdder: render '+' btn");
     return (
-      <button
-        onClick={() => {
-          if (title) {
-            props.doAddComplete(title);
-            refTitleIpt.current.value = "";
-          } else {
-            console.log("Input is empty");
-          }
-        }}
-      >
-        +
-      </button>
+      <div>
+        <IconButton
+          size="small"
+          color="primary"
+          aria-label="editComplete"
+          onClick={() => {
+            if (title) {
+              props.doAddComplete(title);
+              refTitleIpt.current.value = "";
+            } else {
+              console.log("Input is empty");
+            }
+          }}
+        >
+          <AddIcon />
+        </IconButton>
+      </div>
     );
   };
 
@@ -39,7 +47,8 @@ function TodoItemAdder(props) {
       <input style={{ visibility: "hidden" }} type="checkbox"></input>
       <div style={{ flex: "1" }}>
         {
-          <input
+          <TextField
+            size="small"
             ref={refTitleIpt}
             type="text"
             onChange={(e) => setTitle(e.target.value)}
@@ -49,7 +58,7 @@ function TodoItemAdder(props) {
                 refTitleIpt.current.value = "";
               }
             }}
-          ></input>
+          ></TextField>
         }
       </div>
       <div style={{ width: "100px" }}>{renderAddBtns()}</div>

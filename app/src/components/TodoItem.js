@@ -11,6 +11,9 @@ import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 
+import ListItemText from "@mui/material/ListItemText";
+import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
+import Typography from "@mui/material/Typography";
 function TodoItem(props) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
@@ -76,26 +79,26 @@ function TodoItem(props) {
 
   const renderBtns = () => {
     return Boolean(props.isEditing) ? (
-      <>
+      <ListItemSecondaryAction>
         <IconButton
           size="small"
           color="primary"
-          aria-label="edit"
+          aria-label="editComplete"
           onClick={onEditComplete}
         >
           <CheckIcon />
         </IconButton>
-        <Fab
+        <IconButton
           size="small"
           color="primary"
-          // aria-label="edit"
+          aria-label="editCancel"
           onClick={onEditCancel}
         >
           <CloseIcon />
-        </Fab>
-      </>
+        </IconButton>
+      </ListItemSecondaryAction>
     ) : (
-      <>
+      <ListItemSecondaryAction>
         <IconButton
           size="small"
           color="primary"
@@ -105,10 +108,15 @@ function TodoItem(props) {
           <EditIcon />
         </IconButton>
 
-        <Fab size="small" color="primary" aria-label="edit" onClick={onDelete}>
+        <IconButton
+          size="small"
+          color="primary"
+          aria-label="delete"
+          onClick={onDelete}
+        >
           <DeleteForeverIcon />
-        </Fab>
-      </>
+        </IconButton>
+      </ListItemSecondaryAction>
     );
   };
 
@@ -131,14 +139,9 @@ function TodoItem(props) {
           }}
         ></TextField>
       ) : (
-        <label
-          style={{
-            textDecoration: props.isChecked ? "line-through" : "none",
-            flex: "1",
-          }}
-        >
-          {props.itemTitle}
-        </label>
+        <ListItemText>
+          <Typography variant="body1">{props.itemTitle}</Typography>
+        </ListItemText>
       )
     );
   };

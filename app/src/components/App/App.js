@@ -5,7 +5,7 @@ import TodoItemAdder from "../TodoItemAdder";
 import KeyTestItem from "../KeyTestItem";
 import Button from "@mui/material/Button";
 
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, MouseSensor, useSensor, useSensors } from "@dnd-kit/core";
 
 import { arrayMove, SortableContext } from "@dnd-kit/sortable";
 
@@ -184,6 +184,15 @@ function App() {
     });
   };
 
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      // Require the mouse to move by 10 pixels before activating
+      activationConstraint: {
+        distance: 10,
+      },
+    })
+  );
+
   return (
     <div>
       <div id="app">{title}</div>
@@ -199,15 +208,16 @@ function App() {
         </Button>
       </div>
       <div id="todolist" style={{ width: "400px" }}>
-        <List>
+        <List disablePadding>
           <DndContext
+            sensors={sensors}
             onDragStart={() => {}}
             onDragEnd={handleDragEnd}
             modifiers={[restrictToVerticalAxis]}
           >
             <SortableContext items={todos}>
               {todos.map((todo) => (
-                <ListItem>
+                <ListItem disablePadding>
                   <ListItemButton>
                     <TodoItem
                       key={todo.id}
@@ -231,6 +241,9 @@ function App() {
         <TodoItemAdder doAddComplete={doAddComplete} />
       </div>
 
+      <div>
+        1. 調整list item 高度(文字上下置中)<br></br> 2. 對齊新增與list item
+      </div>
       <div>
         {KeyTestList.map((myKeyTestList, index) => (
           <KeyTestItem
